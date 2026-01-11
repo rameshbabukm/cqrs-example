@@ -1,12 +1,24 @@
 version: '3.9'
 
 services:
+  account-ui:
+    image: 'account-ui:latest'
+    build:
+      context: ./account-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - account-cmd
+      - account-query
+    networks:
+      - bankAccount
+
   account-cmd:
     image: 'account-cmd:latest'
     build:
       context: ./account.cmd
     ports:
-      - "5000:5000"
+      - "5002:5002"
     depends_on:
       - zookeeper
       - kafka
@@ -17,7 +29,7 @@ services:
       - spring.data.mongodb.host=mongodb
       - spring.data.mongodb.port=27017
       - spring.data.mongodb.database=bankAccount
-      - server.port=5000
+      - server.port=5002
       - spring.kafka.producer.bootstrap-servers=kafka:9092
     networks:
       - bankAccount
@@ -64,7 +76,6 @@ services:
       timeout: 20s
       retries: 10
 
-
   mongodb:
     image: "mongo:latest"
     container_name: mongo-container
@@ -77,34 +88,32 @@ services:
       - bankAccount
 
   zookeeper:
-    image: 'bitnami/zookeeper:latest'
+    image: 'confluentinc/cp-zookeeper:7.5.0'
     restart: always
     ports:
       - "2181:2181"
-    volumes:
-      - "zookeeper_data:/bitnami"
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     networks:
       - bankAccount
 
   kafka:
-    image: 'bitnami/kafka:latest'
+    image: 'confluentinc/cp-kafka:7.5.0'
+    restart: always
     ports:
       - '9092:9092'
-      - '9093:9093'
-    environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
     depends_on:
       - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - bankAccount
-
 
 volumes:
   mongodb_data_container:

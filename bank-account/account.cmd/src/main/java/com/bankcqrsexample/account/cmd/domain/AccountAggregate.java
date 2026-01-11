@@ -20,13 +20,13 @@ public class AccountAggregate extends AggregateRoot {
 
 
     public AccountAggregate(OpenAccountCommand command) {
-        raiseEvent(AccountOpenedEvent.builder()
-                .id(command.getId())
-                .accountHolder(command.getAccountHolder())
-                .createdDate(new Date())
-                .accountType(command.getAccountType())
-                .openingBalance(command.getOpeningBalance())
-                .build());
+        var event = new AccountOpenedEvent();
+        event.setId(command.getId());
+        event.setAccountHolder(command.getAccountHolder());
+        event.setCreatedDate(new Date());
+        event.setAccountType(command.getAccountType());
+        event.setOpeningBalance(command.getOpeningBalance());
+        raiseEvent(event);
     }
 
     public void apply(AccountOpenedEvent event) {
@@ -42,10 +42,10 @@ public class AccountAggregate extends AggregateRoot {
         if(amount <= 0) {
             throw new IllegalStateException("The deposit amount must be greater than 0!");
         }
-        raiseEvent(FundsDepositedEvent.builder()
-                .id(this.id)
-                .amount(amount)
-                .build());
+        var event = new FundsDepositedEvent();
+        event.setId(this.id);
+        event.setAmount(amount);
+        raiseEvent(event);
     }
 
     public void apply(FundsDepositedEvent event) {
@@ -57,10 +57,10 @@ public class AccountAggregate extends AggregateRoot {
         if (!this.active) {
             throw new IllegalStateException("Funds cannot be withdrawn from a closed account!");
         }
-        raiseEvent(FundsWithdrawnEvent.builder()
-                .id(this.id)
-                .amount(amount)
-                .build());
+        var event = new FundsWithdrawnEvent();
+        event.setId(this.id);
+        event.setAmount(amount);
+        raiseEvent(event);
     }
 
     public void apply(FundsWithdrawnEvent event) {
@@ -72,9 +72,9 @@ public class AccountAggregate extends AggregateRoot {
         if (!this.active) {
             throw new IllegalStateException("The bank account has already been closed!");
         }
-        raiseEvent(AccountClosedEvent.builder()
-                .id(this.id)
-                .build());
+        var event = new AccountClosedEvent();
+        event.setId(this.id);
+        raiseEvent(event);
     }
 
     public void apply(AccountClosedEvent event) {

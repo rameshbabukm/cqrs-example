@@ -5,18 +5,21 @@ import com.bankcqrsexample.cqrs.core.domain.AggregateRoot;
 import com.bankcqrsexample.cqrs.core.handlers.EventSourcingHandler;
 import com.bankcqrsexample.cqrs.core.infrastructure.EventStore;
 import com.bankcqrsexample.cqrs.core.producers.EventProducer;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 
 @Service
-@RequiredArgsConstructor
 public class AccountEventSourcingHandler implements EventSourcingHandler<AccountAggregate> {
 
     private final EventStore eventStore;
 
     private final EventProducer eventProducer;
+
+    public AccountEventSourcingHandler(EventStore eventStore, EventProducer eventProducer) {
+        this.eventStore = eventStore;
+        this.eventProducer = eventProducer;
+    }
 
     @Override
     public void save(AggregateRoot aggregate) {

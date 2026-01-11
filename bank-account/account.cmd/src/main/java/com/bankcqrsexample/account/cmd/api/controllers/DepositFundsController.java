@@ -4,7 +4,6 @@ import com.bankcqrsexample.account.cmd.api.commands.DepositFundsCommand;
 import com.bankcqrsexample.account.common.dto.BaseResponse;
 import com.bankcqrsexample.cqrs.core.exceptions.AggregateNotFoundException;
 import com.bankcqrsexample.cqrs.core.infrastructure.CommandDispatcher;
-import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +14,15 @@ import java.util.logging.Logger;
 
 @RestController
 @RequestMapping(path = "/api/v1/depositFunds")
-@AllArgsConstructor
 public class DepositFundsController {
 
     private final Logger logger = Logger.getLogger(DepositFundsController.class.getName());
 
     private final CommandDispatcher commandDispatcher;
+
+    public DepositFundsController(CommandDispatcher commandDispatcher) {
+        this.commandDispatcher = commandDispatcher;
+    }
 
     @PutMapping(path = "/{id}")
     public ResponseEntity<BaseResponse> depositFunds(@PathVariable(value = "id") String id,

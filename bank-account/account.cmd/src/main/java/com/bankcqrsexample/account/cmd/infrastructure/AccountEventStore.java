@@ -8,7 +8,6 @@ import com.bankcqrsexample.cqrs.core.exceptions.AggregateNotFoundException;
 import com.bankcqrsexample.cqrs.core.exceptions.ConcurrencyException;
 import com.bankcqrsexample.cqrs.core.infrastructure.EventStore;
 import com.bankcqrsexample.cqrs.core.producers.EventProducer;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -16,18 +15,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class AccountEventStore implements EventStore {
 
     private final EventStoreRepository eventStoreRepository;
 
     private final EventProducer eventProducer;
 
+    public AccountEventStore(EventStoreRepository eventStoreRepository, EventProducer eventProducer) {
+        this.eventStoreRepository = eventStoreRepository;
+        this.eventProducer = eventProducer;
+    }
 
     @Override
     public void saveEvents(String aggregateId, Iterable<BaseEvent> events, int expectedVersion) {
         var eventStream = eventStoreRepository.findByAggregateIdentifier(aggregateId);
-        if (expectedVersion != -1 && eventStream.get(eventStream.size() - 1).getVersion() != expectedVersion) {
+        if (expectedVersion != -1 && eventStream != null && !eventStream.isEmpty() && eventStream.get(eventStream.size() - 1).getVersion() != expectedVersion) {
             throw new ConcurrencyException();
         }
         var version = expectedVersion;

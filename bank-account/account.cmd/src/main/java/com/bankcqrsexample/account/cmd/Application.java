@@ -8,12 +8,16 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@RequiredArgsConstructor
 public class Application {
 
 	private final CommandDispatcher commandDispatcher;
 
-	private final CommandHandler commandHandler;
+	private final AccountCommandHandler commandHandler;
+
+	public Application(CommandDispatcher commandDispatcher, AccountCommandHandler commandHandler) {
+		this.commandDispatcher = commandDispatcher;
+		this.commandHandler = commandHandler;
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
